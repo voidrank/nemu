@@ -38,6 +38,71 @@ static int cmd_q(char *args) {
 
 static int cmd_help(char *args);
 
+static int info(char *args) {
+    if (args == NULL) {
+        printf("No such operation.\n");
+    }
+    else if (strcmp(args, "r") == 0) {
+        printf("eax %x %d\n", cpu.eax, cpu.eax);
+        printf("ecx %x %d\n", cpu.ecx, cpu.ecx);
+        printf("edx %x %d\n", cpu.edx, cpu.edx);
+        printf("ebx %x %d\n", cpu.ebx, cpu.ebx);
+        printf("esp %x %d\n", cpu.esp, cpu.esp);
+        printf("ebp %x %d\n", cpu.ebp, cpu.ebp);
+        printf("esi %x %d\n", cpu.esi, cpu.esi);
+        printf("edi %x %d\n", cpu.edi, cpu.edi);
+        printf("eip %x %d\n", cpu.eip, cpu.eip);
+    }
+    else if (strcmp(args, "w") == 0){
+        show_watchpoint();
+    }
+    else {
+        printf("No such operation.\n");
+    }
+    return 0;
+}
+
+static int step_i(char *args) {
+    int step_ct;
+    if (args == NULL) 
+        step_ct = 1;
+    else 
+        step_ct = atoi(args);
+    cpu_exec(step_ct);
+    return 0;
+}
+
+static int print_expr(char *args) {
+    bool success[2];
+    int ret_v = expr(args, success);
+    if (*success == false) 
+        printf("Unvaliable expression.\n");
+    else
+        printf("%s: %d\n", args, ret_v);
+    return 0;
+}
+
+static int show_mem(char *args) {
+
+    int n = 0, i;
+    for ( ; *args == ' '; ++args);
+    for ( ; *args >= '0' && *args <= '9'; ++args)
+        n = n * 10 + *args - '0';
+    puts("show mem: ");
+
+    bool success[2];
+    int start_pos = expr(args, success);
+    if (*success == false) {
+        printf("Unvaliable expression.\n");
+        return -1;
+    }
+
+    for (i = 0; i < n; ++i)
+        printf("%x\n", hwaddr_read(start_pos + i*4, 4));
+
+    return 0;
+}
+
 static struct {
 	char *name;
 	char *description;
@@ -46,9 +111,12 @@ static struct {
 	{ "help", "Display informations about all supported commands", cmd_help },
 	{ "c", "Continue the execution of the program", cmd_c },
 	{ "q", "Exit NEMU", cmd_q },
-
-	/* TODO: Add more commands */
-
+    { "si", "step x operations", step_i},
+    { "info", "Show all registers", info},
+    { "p", "print expression value", print_expr},
+    { "x", "Show memory", show_mem},
+    { "w", "create watch point", create_watchpoint},
+    { "d", "delete watch point", delete_watchpoint},
 };
 
 #define NR_CMD (sizeof(cmd_table) / sizeof(cmd_table[0]))

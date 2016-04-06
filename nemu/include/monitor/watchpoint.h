@@ -3,13 +3,20 @@
 
 #include "common.h"
 
+#define EXPR_MAX_LEN 128
+
 typedef struct watchpoint {
-	int NO;
+	int NO, value;
+    bool valid;
 	struct watchpoint *next;
-
-	/* TODO: Add more members if necessary */
-
+    char expr[EXPR_MAX_LEN];
 
 } WP;
+
+void show_watchpoint();
+int create_watchpoint(char *);
+int delete_watchpoint(char *);
+bool check_change();
+
 
 #endif

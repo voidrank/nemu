@@ -1,4 +1,5 @@
 #include "monitor/monitor.h"
+#include "monitor/watchpoint.h"
 #include "cpu/helper.h"
 #include <setjmp.h>
 
@@ -72,8 +73,10 @@ void cpu_exec(volatile uint32_t n) {
 		}
 #endif
 
-		/* TODO: check watchpoints here. */
-
+        if (check_change()) {
+            show_watchpoint();
+            break;
+        }
 
 		if(nemu_state != RUNNING) { return; }
 	}
