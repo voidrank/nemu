@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 
-#define instr sub
+#define instr test
 
 static void do_execute() {
 
@@ -11,11 +11,11 @@ static void do_execute() {
     int result8;
     src = op_src->val;
     dest = op_dest->val;
-    result = dest - src;
+    result = dest & src;
 
-    SUB_EFLAGS(result,dest,src,result8);
+    TEST_EFLAGS(result,result8);
 
-    OPERAND_W(op_dest, dest - src);
+    OPERAND_W(op_dest, result);
     print_asm_template2();
 }
 
@@ -23,9 +23,6 @@ make_instr_helper(i2r)
 make_instr_helper(i2rm)
 make_instr_helper(r2rm)
 make_instr_helper(rm2r)
-#if DATA_BYTE > 1
-make_instr_helper(i2rm_b)
-#endif
 
 
 

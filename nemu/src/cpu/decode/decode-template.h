@@ -119,6 +119,13 @@ make_helper(concat(decode_i2rm_, SUFFIX)) {
 	return len;
 }
 
+make_helper(concat(decode_i2rm_b_, SUFFIX)) {
+    int len = decode_rm_internal(eip, op_dest, op_src2);
+    len += decode_i_b(eip + len);
+    op_src->val = (DATA_TYPE_S)((char)op_src->val);
+    return len;
+}
+
 /* XX <- Ib 
  * eXX <- Iv 
  */

@@ -26,5 +26,7 @@ extern Operands ops_decoded;
 #define op_src2 (&ops_decoded.src2)
 #define op_dest (&ops_decoded.dest)
 
+#define usub_ok(x,y) (!(y)||!uadd_ok((x),-(y)))
+#define uadd_ok(x,y) (!((x)+(y)<(x)))
 
 #endif

@@ -33,3 +33,38 @@
 #define OPERAND_W(op, src) concat(write_operand_, SUFFIX) (op, src)
 
 #define MSB(n) ((DATA_TYPE)(n) >> ((DATA_BYTE << 3) - 1))
+
+#define SUB_EFLAGS(result,dest,src,result8) \
+    /* clear */\
+    cpu.eflags &=  0x726; \
+    /* OF */ \
+    cpu.eflags |= usub_ok(dest, src) << 11; \
+    /* SF */ \
+    cpu.eflags |= ((result>>((DATA_BYTE<<3)-1))&1) << 7; \
+    /* ZF */ \
+    cpu.eflags |= (result==0) << 6; \
+    /* AF */ \
+    cpu.eflags |= ((dest&0xf) < (src&0xf)) << 4;\
+    /* PF */ \
+    result8 = (result&0x55) + ((result>>1)&0x55); \
+    result8 = (result8&0x33) + ((result8>>2)&0x33); \
+    result8 = (result8&0xf) + ((result8>>4)&0xf); \
+    result8 = result & 1; \
+    cpu.eflags |= result8 << 2; \
+    /* CF */ \
+    cpu.eflags |= ((dest&0xff) < (src&0xff)) << 0; 
+
+#define TEST_EFLAGS(result,result8) \
+    /* clear */ \
+    cpu.eflags &= 0x726; \
+    /* SF */ \
+    cpu.eflags |= ((result>>((DATA_BYTE<<3)-1))&1) << 7; \
+    /* ZF */ \
+    cpu.eflags |= (result==0) << 6; \
+    /* PF */ \
+    result8 = (result&0x55) + ((result>>1)&0x55); \
+    result8 = (result8&0x33) + ((result8>>2)&0x33); \
+    result8 = (result8&0xf) + ((result8>>4)&0xf); \
+    result8 = result & 1; \
+    cpu.eflags |= result8 << 2; \
+
