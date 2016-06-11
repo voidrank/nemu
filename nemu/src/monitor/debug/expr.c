@@ -6,11 +6,12 @@
 #include <sys/types.h>
 #include <regex.h>
 #include <stdlib.h>
+#include "memory/memory.h"
 
 enum {
 	NOTYPE = 256, EQ, PLUS, SUBTRACT, MULTIPLY, DIVIDE, POW,
     LEFT_PARENTHESIS, RIGHT_PARENTHESIS,
-    NUMBER, REG
+    NUMBER, REG, VARIANT, POINT_B, POINT_W, POINT_L
 };
 
 static struct rule {
@@ -28,7 +29,11 @@ static struct rule {
     {"\\(", LEFT_PARENTHESIS},        // left parenthesis
     {"\\)", RIGHT_PARENTHESIS},       // right parenthesis
     {"(%eax)|(%ecx)|(%edx)|(%ebx)|(%esp)|(%ebp)|(%esi)|(%edi)", REG}, // register
-	{"==", EQ}						// equal
+	{"==", EQ},						// equal
+    {"[a-z0-9_]+", VARIANT},       // variant
+    {"#", POINT_B},                 // get byte
+    {"\\$", POINT_W},                 // get word
+    {"%", POINT_L}                  // get long
 };
 
 #define NR_REGEX (sizeof(rules) / sizeof(rules[0]) )
@@ -227,6 +232,29 @@ uint32_t expr(char *e, bool *success) {
         // REG
         else if (tokens[i].type == REG) {
             push_num(get_register(tokens[i].str));
+        }
+        else if (tokens[i].type >= POINT_B && tokens[i].type <= POINT_L) {
+            int addr, value;
+            addr = get_num_top();
+            if (tokens[i].type == POINT_B)
+                value = swaddr_read(addr, 1);
+            else if (tokens[i].type == POINT_W)
+                value = swaddr_read(addr, 2);
+            else if (tokens[i].type == POINT_L)
+                value = swaddr_read(addr, 4);
+            pop_num();
+            push_num(value);
+        }
+        else if (tokens[i].type == VARIANT) {
+            int j;
+
+            for (j = 0; j < nr_symtab_entry; ++j) 
+                if ((symtab[j].st_info & STT_OBJECT) && symtab[j].st_name && strcmp(tokens[i].str, strtab+symtab[j].st_name) == 0) 
+                    break;
+
+            Assert(j < nr_symtab_entry, "sy/bol not found");
+
+            push_num(symtab[j].st_value);
         }
     }
 

@@ -5,7 +5,7 @@
 
 make_helper(concat(call_rel_, SUFFIX)) {
     DATA_TYPE rel = instr_fetch(cpu.eip + 1, DATA_BYTE);
-    push(cpu.eip);
+    push(cpu.eip + 5);
     cpu.eip += rel;
     print_asm_template1();
     return 5;

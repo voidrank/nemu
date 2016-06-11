@@ -11,3 +11,6 @@
 #undef OPERAND_W
 
 #undef MSB
+
+#undef push
+#undef pop

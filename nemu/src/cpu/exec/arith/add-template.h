@@ -3,33 +3,30 @@
 #include <stdio.h>
 
 
-#define instr cmp
+#define instr add
 
 static void do_execute() {
 
     DATA_TYPE src, dest, result;
     int result8;
     if (op_src->size == 1)
-        src = (DATA_TYPE_S)((char)op_src->val);
+        src= (DATA_TYPE_S)((char)op_src->val);
     else
         src = op_src->val;
+
     dest = op_dest->val;
-    result = dest - src;
+    result = dest + src;
 
-    SUB_EFLAGS(result,dest,src,result8);
+    ADD_EFLAGS(result,dest,src,result8);
 
+    OPERAND_W(op_dest, dest + src);
     print_asm_template2();
 }
 
-// 2C 2D
 make_instr_helper(i2r)
-// 80 81 83
 make_instr_helper(i2rm)
-// 28 29
 make_instr_helper(r2rm)
-// 2A 2B
 make_instr_helper(rm2r)
-// 83
 #if DATA_BYTE > 1
 make_instr_helper(i2rm_b)
 #endif

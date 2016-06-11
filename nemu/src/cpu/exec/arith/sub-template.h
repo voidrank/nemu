@@ -9,7 +9,11 @@ static void do_execute() {
 
     DATA_TYPE src, dest, result;
     int result8;
-    src = op_src->val;
+    if (op_src->size == 1)
+        src= (DATA_TYPE_S)((char)op_src->val);
+    else
+        src = op_src->val;
+
     dest = op_dest->val;
     result = dest - src;
 

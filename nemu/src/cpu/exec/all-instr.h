@@ -2,10 +2,16 @@
 
 #include "data-mov/mov.h"
 #include "data-mov/push.h"
+#include "data-mov/pop.h"
 #include "data-mov/xchg.h"
 
 #include "control-transfer/call.h"
+#include "control-transfer/jmp.h"
 #include "control-transfer/je.h"
+#include "control-transfer/jle.h"
+#include "control-transfer/jbe.h"
+#include "control-transfer/leave.h"
+#include "control-transfer/ret.h"
 
 #include "arith/dec.h"
 #include "arith/inc.h"
@@ -14,6 +20,7 @@
 #include "arith/mul.h"
 #include "arith/idiv.h"
 #include "arith/div.h"
+#include "arith/add.h"
 #include "arith/sub.h"
 #include "arith/cmp.h"
 #include "arith/test.h"

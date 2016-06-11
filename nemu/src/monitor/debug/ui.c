@@ -103,6 +103,42 @@ static int show_mem(char *args) {
     return 0;
 }
 
+typedef struct {
+    swaddr_t prev_ebp;
+    swaddr_t ret_addr;
+    uint32_t args[4];
+} PartOfStackFrame;
+
+
+int find_func_name(int eip) {
+    for (int i = 0; i < nr_symtab_entry; ++i)
+        if ((symtab[i].st_info & STT_FUNC) && eip >= symtab[i].st_value && eip <= symtab[i].st_value + symtab[i].st_size)
+            return symtab[i].st_name;
+    Assert(0, "funcion not find");
+}
+
+
+static int print_stack_frame(char* args) {
+    int ebp = cpu.ebp;
+    printf("ebp: 0x%x, funcname: %s\n", ebp, strtab + find_func_name(cpu.eip));
+    while (ebp != 0) {
+        PartOfStackFrame sf;
+        sf.prev_ebp = swaddr_read(ebp, 4);
+        sf.ret_addr = swaddr_read(ebp+4, 4);
+        printf("prev_ebp: 0x%x, ret_addr: 0x%x\n", sf.prev_ebp, sf.ret_addr);
+        for (int i = 0; i < 4; ++i) {
+            if (ebp+12+i*4 <= 0x8000000)
+                sf.args[i] = swaddr_read(ebp+8+i*4, 4);
+            else
+                sf.args[i] = 0;
+            printf("args[%d]: 0x%x, ", i, sf.args[i]);
+        }
+        puts("\n");
+        ebp = sf.prev_ebp;
+    }
+    return 0;
+}
+
 static struct {
 	char *name;
 	char *description;
@@ -117,6 +153,7 @@ static struct {
     { "x", "Show memory", show_mem},
     { "w", "create watch point", create_watchpoint},
     { "d", "delete watch point", delete_watchpoint},
+    { "bt", "print stack frame", print_stack_frame},
 };
 
 #define NR_CMD (sizeof(cmd_table) / sizeof(cmd_table[0]))

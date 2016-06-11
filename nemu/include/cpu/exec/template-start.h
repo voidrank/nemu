@@ -54,6 +54,27 @@
     /* CF */ \
     cpu.eflags |= ((dest&0xff) < (src&0xff)) << 0; 
 
+
+#define ADD_EFLAGS(result,dest,src,result8) \
+    /* clear */\
+    cpu.eflags &=  0x726; \
+    /* OF */ \
+    cpu.eflags |= uadd_ok(dest, src) << 11; \
+    /* SF */ \
+    cpu.eflags |= ((result>>((DATA_BYTE<<3)-1))&1) << 7; \
+    /* ZF */ \
+    cpu.eflags |= (result==0) << 6; \
+    /* AF */ \
+    cpu.eflags |= ((dest&0xf) < (src&0xf)) << 4;\
+    /* PF */ \
+    result8 = (result&0x55) + ((result>>1)&0x55); \
+    result8 = (result8&0x33) + ((result8>>2)&0x33); \
+    result8 = (result8&0xf) + ((result8>>4)&0xf); \
+    result8 = result & 1; \
+    cpu.eflags |= result8 << 2; \
+    /* CF */ \
+    cpu.eflags |= ((dest&0xff) < (src&0xff)) << 0; 
+
 #define TEST_EFLAGS(result,result8) \
     /* clear */ \
     cpu.eflags &= 0x726; \
@@ -67,4 +88,24 @@
     result8 = (result8&0xf) + ((result8>>4)&0xf); \
     result8 = result & 1; \
     cpu.eflags |= result8 << 2; \
+
+#if DATA_BYTE == 4
+    #define push(x) \
+        REG(R_ESP) -= 4; \
+        MEM_W(REG(R_ESP), x)
+#elif DATA_BYTE == 2 
+    #define push(x) \
+        REG(R_ESP) -= 2; \
+        MEM_W(REG(R_ESP), x)
+#endif 
+
+#if DATA_BYTE == 4
+    #define pop(ret) \
+        ret = MEM_R(REG(R_ESP));\
+        REG(R_ESP) += 4
+#elif DATA_BYTE == 2
+    #define pop(ret) \
+        ret = MEM_R(REG(R_SP)); \
+        REG(R_SP) += 2
+#endif
 

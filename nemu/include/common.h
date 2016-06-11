@@ -15,6 +15,7 @@
 #include <stdint.h>
 #include <assert.h>
 #include <string.h>
+#include <elf.h>
 
 typedef uint8_t bool;
 typedef uint32_t hwaddr_t;
@@ -22,6 +23,10 @@ typedef uint32_t lnaddr_t;
 typedef uint32_t swaddr_t;
 
 typedef uint16_t ioaddr_t;
+
+char *strtab;
+Elf32_Sym *symtab;
+int nr_symtab_entry;
 
 #pragma pack (1)
 typedef union {
